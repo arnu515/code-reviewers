@@ -29,3 +29,7 @@
         }
     }
 </script>
+
+<svelte:head>
+    <title>Edit post - CodeReviewers</title>
+</svelte:head>
