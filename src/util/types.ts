@@ -16,8 +16,19 @@ export interface User {
 export interface Post {
     id: number;
     title: string;
+    description: string;
     public: boolean;
     suggestions: boolean;
+    created_at: string;
+    updated_at: string;
+    user: User;
+}
+
+export interface Code {
+    id: number;
+    filename: string;
+    language: string;
+    path: string;
     created_at: string;
     updated_at: string;
     user: User;
