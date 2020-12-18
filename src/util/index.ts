@@ -5,6 +5,6 @@ export function handleAxiosError(e: any): string {
             "An unknown error occured: " + e.response.status
         );
     } else {
-        return e as string;
+        return JSON.stringify(e);
     }
 }
