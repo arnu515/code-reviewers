@@ -10,6 +10,7 @@
     import { user } from "../../util/stores";
     import axios from "axios";
     import type { Code, Resp } from "../../util/types";
+    import { handleAxiosError } from "../../util";
 
     export let next: string;
 
@@ -17,6 +18,7 @@
     const { apiUrl, accessToken } = $session;
 
     let name: string, lang: string, files: FileList, error: string;
+    let loading = false;
 
     onMount(() => {
         if (!$user) goto("/login");
@@ -34,6 +36,7 @@
             return;
         }
 
+        loading = true;
         let fd = new FormData();
 
         fd.append("filename", name.trim());
@@ -48,11 +51,14 @@
                 },
             })
             .then(({ data }) => {
+                loading = false;
                 if (data.success) goto(next || "/code/" + data.data.code.id);
             })
             .catch((e) => {
+                loading = false;
                 if ([401, 403, 422].includes(e?.response?.status))
                     goto("/logout");
+                else error = handleAxiosError(e);
             });
     }
 </script>
@@ -87,5 +93,11 @@
         <input type="file" id="file" class="form-control" bind:files />
         <small class="text-muted">Please only send files with UTF-8 encoding!</small>
     </p>
-    <p><button type="submit" class="btn btn-success">Submit</button></p>
+    <p>
+        <button type="submit" class="btn btn-success" disabled={loading}>
+            Submit
+
+            {#if loading}<span class="spinner-border spinner-border-sm" />{/if}
+        </button>
+    </p>
 </form>
