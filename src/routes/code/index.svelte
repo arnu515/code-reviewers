@@ -1,3 +1,9 @@
+<script context="module">
+    export function preload({ query: { next } }) {
+        return { next };
+    }
+</script>
+
 <script lang="ts">
     import { stores, goto } from "@sapper/app";
     import { onMount } from "svelte";
@@ -5,13 +11,15 @@
     import axios from "axios";
     import type { Code, Resp } from "../../util/types";
 
+    export let next: string;
+
     const { session } = stores();
     const { apiUrl, accessToken } = $session;
 
     let name: string, lang: string, files: FileList, error: string;
 
     onMount(() => {
-        if (!user) goto("/login");
+        if (!$user) goto("/login");
     });
 
     function submit() {
@@ -28,8 +36,8 @@
 
         let fd = new FormData();
 
-        fd.append("filename", name);
-        fd.append("language", lang);
+        fd.append("filename", name.trim());
+        fd.append("language", lang.trim().toLowerCase());
         fd.append("file", files[0]);
 
         axios
@@ -40,7 +48,7 @@
                 },
             })
             .then(({ data }) => {
-                if (data.success) goto("/code/" + data.data.code.id);
+                if (data.success) goto(next || "/code/" + data.data.code.id);
             })
             .catch((e) => {
                 if ([401, 403, 422].includes(e?.response?.status))
