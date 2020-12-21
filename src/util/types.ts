@@ -44,3 +44,13 @@ export interface Review {
     updated_at: string;
     user: User;
 }
+
+export interface Suggestion {
+    id: number;
+    title: string;
+    content: string;
+    code: Code;
+    created_at: string;
+    updated_at: string;
+    user: User;
+}

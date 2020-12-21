@@ -21,10 +21,11 @@
     import { user } from "../../../util/stores";
     import { onMount, tick } from "svelte";
     import Loading from "../../../components/Loading.svelte";
-    import type { Code, Review } from "../../../util/types";
+    import type { Code, Review, Suggestion } from "../../../util/types";
     import { handleAxiosError } from "../../../util";
     import hljs from "highlight.js";
     import { fade } from "svelte/transition";
+    import { stringify } from "qs";
 
     export let post: Post;
     export let apiUrl: string;
@@ -33,10 +34,17 @@
     // false = reviews, true = suggestions
     let reviewsSuggestions = false;
 
-    let reviewTitle: string,
-        reviewContent: string,
+    let reviewTitle: string = "",
+        reviewContent: string = "",
         reviewStars = 0,
-        reviewError: string;
+        reviewError: string = "";
+
+    let sugTitle: string = "",
+        sugContent: string = "",
+        sugCode: Code,
+        sugErr: string = "",
+        codeErr: string = "",
+        modalActive = false;
 
     async function getReviews() {
         try {
@@ -44,6 +52,18 @@
                 apiUrl + "/api/reviews/" + post.id
             );
             return data.data.reviews;
+        } catch (e) {
+            console.error(e);
+            alert(handleAxiosError(e));
+        }
+    }
+
+    async function getSuggestions() {
+        try {
+            const { data } = await axios.get<
+                Resp<{ suggestions: Suggestion[] }>
+            >(apiUrl + "/api/suggestions/" + post.id);
+            return data.data.suggestions;
         } catch (e) {
             console.error(e);
             alert(handleAxiosError(e));
@@ -102,6 +122,56 @@
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/logout";
             else reviewError = handleAxiosError(e);
+        }
+    }
+
+    async function getCode() {
+        try {
+            const { data } = await axios.get<Resp<{ code: Code[] }>>(
+                apiUrl + "/api/code",
+                {
+                    headers: { Authorization: "Bearer " + accessToken },
+                }
+            );
+            if (data.success) return data.data.code;
+            else return [];
+        } catch (e) {
+            if ([403, 401, 422].includes(e?.response?.status))
+                window.location.href = "/logout";
+            else codeErr = handleAxiosError(e);
+            return [];
+        }
+    }
+
+    async function addSuggestion() {
+        console.error(!sugContent);
+        if (!sugTitle.trim() || !sugContent.trim()) {
+            sugErr = "Fill out all fields!";
+            return;
+        }
+
+        if (!sugCode) {
+            sugErr = "Choose your code";
+            return;
+        }
+
+        sugErr = "";
+
+        try {
+            const { data } = await axios.post<Resp<{ suggestion: {} }>>(
+                apiUrl + "/api/suggestions/" + post.id,
+                {
+                    title: sugTitle.trim(),
+                    content: sugContent.trim(),
+                    code: sugCode.id,
+                },
+                { headers: { Authorization: "Bearer " + accessToken } }
+            );
+            if (data.success) window.location.reload();
+        } catch (e) {
+            if ([403, 401, 422].includes(e?.response?.status))
+                window.location.href = "/logout";
+            else sugErr = handleAxiosError(e);
         }
     }
 </script>
@@ -234,10 +304,12 @@
         {/if}
         <h3 class="d-flex w-100 align-items-center">
             Reviews
-            <button
-                class="btn btn-outline-dark ms-auto"
-                data-bs-toggle="collapse"
-                data-bs-target="#new-review">New review</button>
+            {#if $user}
+                <button
+                    class="btn btn-outline-dark ms-auto"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#new-review">New review</button>
+            {/if}
         </h3>
         <div class="collapse" id="new-review">
             <div class="card my-3">
@@ -343,13 +415,147 @@
     <div class="m-2" in:fade>
         <h3 class="d-flex w-100 align-items-center">
             Suggestions
-            <button
-                class="btn btn-outline-dark ms-auto"
-                data-bs-toggle="collapse"
-                data-bs-target="#new-suggestion">New suggestion</button>
+            {#if $user}
+                <button
+                    class="btn btn-outline-dark ms-auto"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#new-suggestion">New suggestion</button>
+            {/if}
         </h3>
         <div class="collapse" id="new-suggestion">
-            <div class="card" />
+            <div class="card">
+                <div class="card-header">New suggestion</div>
+                <div class="card-body">
+                    {#if sugErr}
+                        <div class="alert alert-danger">{sugErr}</div>
+                    {/if}
+                    <form on:submit|preventDefault={addSuggestion}>
+                        <p>
+                            <label for="title">Title</label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="title"
+                                bind:value={sugTitle} />
+                        </p>
+                        <p>
+                            <label for="content">Content</label>
+                            <textarea
+                                id="content"
+                                class="form-control"
+                                bind:value={sugContent}
+                                rows="4" />
+                        </p>
+                        <p>
+                            Code
+                            <button
+                                class="btn btn-outline-dark w-100"
+                                data-bs-toggle="modal"
+                                data-bs-target="#add-code-modal"
+                                on:click={() => (modalActive = true)}
+                                type="button">{sugCode?.filename || 'Add code'}
+                            </button>
+                        </p>
+                        <p>
+                            <button class="btn btn-success" type="submit">Add
+                                suggestion</button>
+                        </p>
+                    </form>
+                </div>
+            </div>
         </div>
+        {#await getSuggestions()}
+            <Loading message="Loading reviews" />
+        {:then suggestions}
+            {#if suggestions && suggestions.length > 0}
+                {#each suggestions as s}
+                    <div class="card mt-2">
+                        <div class="card-header d-flex align-items-center">
+                            @{s.user.username}
+                            <span
+                                class="ms-auto text-muted">{new Date(s.created_at)}</span>
+                        </div>
+                        <div class="card-body">
+                            <h4>{s.title}</h4>
+                            <p>{s.content}</p>
+                            <div class="mt-2">
+                                <a
+                                    href="/code/{s.code.id}"
+                                    class="btn btn-outline-dark w-100">{s.code.filename}</a>
+                            </div>
+                        </div>
+                    </div>
+                {/each}
+            {/if}
+        {/await}
     </div>
 {/if}
+
+<div
+    class="modal fade"
+    id="add-code-modal"
+    tabindex="-1"
+    aria-labelledby="title">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title">Add code</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close" />
+            </div>
+            <div class="modal-body">
+                {#if codeErr}
+                    <div class="alert alert-danger">{codeErr}</div>
+                {/if}
+
+                {#if modalActive}
+                    {#await getCode()}
+                        <Loading message="Fetching your code" />
+                    {:then code}
+                        <div class="list-group">
+                            {#each code as c}
+                                <div
+                                    class="list-group-item list-group-item-action{sugCode?.id === c.id ? ' active disabled' : ''}"
+                                    id="code-{c.id}"
+                                    on:click={() => (sugCode = c)}
+                                    style="cursor: pointer;">
+                                    <div
+                                        class="d-flex w-100 justify-content-between">
+                                        <strong>{c.filename}</strong>
+                                        <small
+                                            id="lang"
+                                            class="text-muted">{c.language.toUpperCase()}</small>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                        <div class="mt-5">
+                            <button
+                                href="/code"
+                                data-bs-dismiss="modal"
+                                on:click={() => (window.location.href = '/code?' + stringify(
+                                            {
+                                                next:
+                                                    '/posts/' +
+                                                    post.id +
+                                                    '/#reviews',
+                                            }
+                                        ))}
+                                class="btn btn-outline-dark mt-2">Upload code</button>
+                        </div>
+                    {/await}
+                {/if}
+            </div>
+            <div class="modal-footer">
+                <button
+                    class="btn btn-success"
+                    type="button"
+                    on:click={() => (modalActive = false)}
+                    data-bs-dismiss="modal">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
