@@ -156,6 +156,9 @@
         at
         {new Date(post.created_at).toDateString()}</small>
 </p>
+{#if $user?.id === post.user.id}
+    <a href="/posts/{post.id}/edit" class="btn btn-outline-dark">Edit post</a>
+{/if}
 <hr />
 
 <h3>
@@ -225,7 +228,7 @@
 </div>
 
 {#if !reviewsSuggestions}
-    <div class="m-2" in:fade on:submit|preventDefault={addReview}>
+    <div class="m-2" in:fade>
         {#if reviewError}
             <div class="alert alert-danger">{reviewError}</div>
         {/if}
@@ -240,7 +243,7 @@
             <div class="card my-3">
                 <div class="card-header">New review</div>
                 <div class="card-body">
-                    <form>
+                    <form on:submit|preventDefault={addReview}>
                         <p>
                             <label for="title">Title</label>
                             <input
@@ -335,5 +338,18 @@
                 <p>No reviews yet!</p>
             {/if}
         {/await}
+    </div>
+{:else}
+    <div class="m-2" in:fade>
+        <h3 class="d-flex w-100 align-items-center">
+            Suggestions
+            <button
+                class="btn btn-outline-dark ms-auto"
+                data-bs-toggle="collapse"
+                data-bs-target="#new-suggestion">New suggestion</button>
+        </h3>
+        <div class="collapse" id="new-suggestion">
+            <div class="card" />
+        </div>
     </div>
 {/if}
