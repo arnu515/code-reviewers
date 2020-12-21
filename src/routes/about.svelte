@@ -27,7 +27,9 @@
         <li>CSS Framework: <a href="https://getbootstrap.com">BootStrap</a></li>
         <li>
             Hosting:
-            <a href="https://app.digitalocean.com">DigitalOcean App Platform</a>
+            <a
+                href="https://digitalocean.com/products/app-platform">DigitalOcean
+                App Platform</a>
         </li>
     </ul>
     <p>And for the backend:</p>
@@ -40,7 +42,9 @@
         <li>Database: SQLite in Dev, PostgreSQL in Prod</li>
         <li>
             Hosting:
-            <a href="https://app.digitalocean.com">DigitalOcean App Platform</a>
+            <a
+                href="https://digitalocean.com/products/app-platform">DigitalOcean
+                App Platform</a>
         </li>
     </ul>
 
