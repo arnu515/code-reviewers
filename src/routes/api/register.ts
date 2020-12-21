@@ -18,16 +18,15 @@ export async function post(req: ClientRequest, res: ServerResponse) {
         );
     }
 
-    const r = await axios.post<Resp<{ user: User; token: string }>>(
-        apiUrl + "/api/auth/register",
-        {
-            email,
-            password,
-            username,
-        }
-    );
-
     try {
+        const r = await axios.post<Resp<{ user: User; token: string }>>(
+            apiUrl + "/api/auth/register",
+            {
+                email,
+                password,
+                username,
+            }
+        );
         if (r.data.success) {
             res.statusCode = 200;
             (req as any).session.accessToken = r.data.data.token;
