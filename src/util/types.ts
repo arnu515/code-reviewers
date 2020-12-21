@@ -34,3 +34,13 @@ export interface Code {
     updated_at: string;
     user: User;
 }
+
+export interface Review {
+    id: number;
+    title: string;
+    content: string;
+    stars: number;
+    created_at: string;
+    updated_at: string;
+    user: User;
+}
