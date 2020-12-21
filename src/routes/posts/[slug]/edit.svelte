@@ -47,7 +47,7 @@
     let title = writable(post.title);
     let description = writable(post.description);
     let code: Code[] | null = null;
-    let selectedCode: Code[] = [];
+    let selectedCode: Code[] = post.code;
 
     let updateErr: string,
         otherSettingsErr: string,
@@ -56,7 +56,8 @@
     let updateLoading = false,
         pubLoading = false,
         sugLoading = false,
-        delLoading = false;
+        delLoading = false,
+        removeCodeLoading = false;
 
     async function updatePost() {
         updateLoading = true;
@@ -159,6 +160,39 @@
         }
     }
 
+    async function addCode() {
+        try {
+            const { data } = await axios.put<Resp<{ post: Post }>>(
+                apiUrl + "/api/posts/" + post.id + "/add/code",
+                { code: selectedCode.map((x) => x.id) },
+                { headers: { Authorization: "Bearer " + accessToken } }
+            );
+            if (data.success) post = data.data.post;
+        } catch (e) {
+            if ([403, 401, 422].includes(e?.response?.status)) goto("/logout");
+            else codeErr = handleAxiosError(e);
+        }
+    }
+
+    async function removeCode(id: number) {
+        try {
+            removeCodeLoading = true;
+            const { data } = await axios.put<Resp<{ post: Post }>>(
+                apiUrl + "/api/posts/" + post.id + "/delete/code",
+                {
+                    code: [id],
+                },
+                { headers: { Authorization: "Bearer " + accessToken } }
+            );
+            removeCodeLoading = false;
+            if (data.success) post = data.data.post;
+        } catch (e) {
+            removeCodeLoading = false;
+            if ([403, 401, 422].includes(e?.response?.status)) goto("/logout");
+            else codeErr = handleAxiosError(e);
+        }
+    }
+
     $: {
         $title = post.title;
         $description = post.description;
@@ -181,11 +215,14 @@
     <title>Edit post - CodeReviewers</title>
 </svelte:head>
 <h1 class="display-5 text-center">Edit your post</h1>
+<p class="text-center lead">
+    <a href="/posts/{post.id}" style="text-decoration: none">Visit post</a>
+</p>
 
 <h3 class="text-center">Code</h3>
 
 {#if selectedCode}
-    {#each selectedCode as c}
+    {#each post.code as c}
         <div class="accordion mb-2" id="accordion-{c.id.toString()}">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="{c.id.toString()}-heading">
@@ -212,7 +249,12 @@
                                 class="text-muted">{new Date(c.created_at).toDateString()}</small>
                             <button
                                 class="btn btn-danger"
-                                on:click={() => (selectedCode = selectedCode.filter((x) => x.id !== c.id))}>Remove</button>
+                                on:click={() => removeCode(c.id)}
+                                disabled={removeCodeLoading}>Remove
+                                {#if removeCodeLoading}
+                                    <span
+                                        class="spinner-border spinner-border-sm" />
+                                {/if}</button>
                         </div>
                     </div>
                 </div>
@@ -221,6 +263,9 @@
     {/each}
 {/if}
 
+{#if codeErr}
+    <div class="mb-2 alert alert-danger">{codeErr}</div>
+{/if}
 <p class="text-center">
     <button
         class="btn-outline-dark btn-lg"
@@ -335,11 +380,9 @@
                             <div
                                 id={c.id.toString()}
                                 style="cursor: pointer"
-                                class="list-group-item list-group-item-action {selectedCode.find((x) => x.id === c.id) ? 'active' : ''}"
+                                class="list-group-item list-group-item-action {selectedCode.find((x) => x.id === c.id) ? 'active disabled' : ''}"
                                 on:click={() => {
-                                    if (selectedCode.find((x) => x.id === c.id)) {
-                                        selectedCode = selectedCode.filter((x) => x.id !== c.id);
-                                    } else {
+                                    if (!selectedCode.find((x) => x.id === c.id)) {
                                         selectedCode = [...selectedCode, c];
                                     }
                                 }}>
@@ -368,11 +411,12 @@
                 <button
                     type="button"
                     class="btn btn-outline-secondary"
-                    on:click={() => (selectedCode = [])}
+                    on:click={() => (selectedCode = post.code)}
                     data-bs-dismiss="modal">Clear items</button>
                 <button
                     type="button"
                     class="btn btn-success"
+                    on:click={addCode}
                     data-bs-dismiss="modal">Add</button>
             </div>
         </div>
