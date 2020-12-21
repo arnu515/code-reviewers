@@ -43,7 +43,7 @@
     export let apiUrl: string;
     export let accessToken: string;
 
-    let { public: pub, suggestions: sug } = post;
+    let { public: pub, suggestions_enabled: sug } = post;
     let title = writable(post.title);
     let description = writable(post.description);
     let code: Code[] | null = null;
@@ -197,7 +197,7 @@
         $title = post.title;
         $description = post.description;
         pub = post.public;
-        sug = post.suggestions;
+        sug = post.suggestions_enabled;
     }
 
     onMount(() => {

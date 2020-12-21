@@ -18,11 +18,13 @@ export interface Post {
     title: string;
     description: string;
     public: boolean;
-    suggestions: boolean;
+    suggestions_enabled: boolean;
     created_at: string;
     updated_at: string;
     user: User;
     code: Code[];
+    suggestions: Suggestion[];
+    reviews: Review[];
 }
 
 export interface Code {

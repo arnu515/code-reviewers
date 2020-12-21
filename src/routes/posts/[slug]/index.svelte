@@ -415,7 +415,7 @@
     <div class="m-2" in:fade>
         <h3 class="d-flex w-100 align-items-center">
             Suggestions
-            {#if $user}
+            {#if $user && post.suggestions_enabled}
                 <button
                     class="btn btn-outline-dark ms-auto"
                     data-bs-toggle="collapse"
@@ -486,6 +486,8 @@
                         </div>
                     </div>
                 {/each}
+            {:else}
+                <p>Suggestions are not enabled for this post!</p>
             {/if}
         {/await}
     </div>
