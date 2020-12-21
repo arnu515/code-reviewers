@@ -160,7 +160,8 @@
 
 <h3>
     Code Uploaded
-    <small style="font-size: 16px"><a href="#reviews">Jump to reviews</a></small>
+    <small style="font-size: 16px"><a href="/posts/{post.id}/#reviews">Jump to
+            reviews</a></small>
 </h3>
 
 {#if !post.code || post.code.length === 0}
