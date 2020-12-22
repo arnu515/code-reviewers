@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
     import axios from "axios";
-    import type { Code, Resp } from "../../util/types";
+    import type { Code, Resp } from "../../../util/types";
 
     export async function preload({ params: { slug } }, { apiUrl }) {
         try {
@@ -15,7 +15,7 @@
 </script>
 
 <script lang="ts">
-    import Loading from "../../components/Loading.svelte";
+    import Loading from "../../../components/Loading.svelte";
     import hljs from "highlight.js";
     import { onMount } from "svelte";
 
