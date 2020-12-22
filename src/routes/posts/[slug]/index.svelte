@@ -475,32 +475,36 @@
                 </div>
             </div>
         </div>
-        {#await getSuggestions()}
-            <Loading message="Loading reviews" />
-        {:then suggestions}
-            {#if suggestions && suggestions.length > 0}
-                {#each suggestions as s}
-                    <div class="card mt-2">
-                        <div class="card-header d-flex align-items-center">
-                            @{s.user.username}
-                            <span
-                                class="ms-auto text-muted">{new Date(s.created_at)}</span>
-                        </div>
-                        <div class="card-body">
-                            <h4>{s.title}</h4>
-                            <p>{s.content}</p>
-                            <div class="mt-2">
-                                <a
-                                    href="/code/{s.code.id}"
-                                    class="btn btn-outline-dark w-100">{s.code.filename}</a>
+        {#if !post.suggestions_enabled}
+            <p>Suggestions are not enabled for this post!</p>
+        {:else}
+            {#await getSuggestions()}
+                <Loading message="Loading suggestions" />
+            {:then suggestions}
+                {#if suggestions && suggestions.length > 0}
+                    {#each suggestions as s}
+                        <div class="card mt-2">
+                            <div class="card-header d-flex align-items-center">
+                                @{s.user.username}
+                                <span
+                                    class="ms-auto text-muted">{new Date(s.created_at)}</span>
+                            </div>
+                            <div class="card-body">
+                                <h4>{s.title}</h4>
+                                <p>{s.content}</p>
+                                <div class="mt-2">
+                                    <a
+                                        href="/code/{s.code.id}"
+                                        class="btn btn-outline-dark w-100">{s.code.filename}</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {/each}
-            {:else}
-                <p>Suggestions are not enabled for this post!</p>
-            {/if}
-        {/await}
+                    {/each}
+                {:else}
+                    <p>There are no suggestions yet.</p>
+                {/if}
+            {/await}
+        {/if}
     </div>
 {/if}
 
