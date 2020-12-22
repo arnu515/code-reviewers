@@ -10,11 +10,14 @@
     <h1 class="display-4" style="font-weight: bolder">CodeReviewers</h1>
     <p class="lead">Write code that others will review</p>
     {#if !$user}
-        <p><a href="/register" class="btn btn-light">Get Started</a></p>
+        <p>
+            <a href="/register" class="btn btn-light">Get Started</a>
+            <a href="/posts" class="btn btn-outline-light">View posts</a>
+        </p>
     {:else}
         <p>
             <a href="/new" class="btn btn-light">Create new post</a>
-            <a href="/explore" class="btn btn-outline-light">Review others' code</a>
+            <a href="/posts" class="btn btn-outline-light">Review others' code</a>
         </p>
     {/if}
 </div>
