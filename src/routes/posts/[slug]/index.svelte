@@ -174,6 +174,16 @@
             else sugErr = handleAxiosError(e);
         }
     }
+
+    function copyLink() {
+        const textarea = document.createElement("textarea");
+        textarea.innerText =
+            window.location.origin + `/posts/${post.id}#reviews`;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+    }
 </script>
 
 <style>
@@ -228,6 +238,7 @@
 </p>
 {#if $user?.id === post.user.id}
     <a href="/posts/{post.id}/edit" class="btn btn-outline-dark">Edit post</a>
+    <button class="btn btn-outline-dark ms-1" on:click={copyLink}>Copy link</button>
 {/if}
 <hr />
 
