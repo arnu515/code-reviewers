@@ -1,5 +1,6 @@
 import CodeMirror from "codemirror";
 import "codemirror/lib/codemirror.css";
+import "codemirror/theme/eclipse.css";
 
 // Loading addons
 import "codemirror/addon/comment/comment.js";

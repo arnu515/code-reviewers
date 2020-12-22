@@ -45,6 +45,70 @@
 
     export let code: Code;
     export let content: string;
+    export let apiUrl: string;
+    export let accessToken: string;
+
+    let { filename, language } = code;
+    let filenameErr = "",
+        langErr = "";
+
+    async function changeFilename() {
+        try {
+            const { data } = await axios.put<Resp<{ code: Code }>>(
+                apiUrl + "/api/code/" + code.id,
+                {
+                    filename,
+                    language,
+                    code: content,
+                },
+                { headers: { Authorization: "Bearer " + accessToken } }
+            );
+            if (data.success) window.location.reload();
+        } catch (e) {
+            if ([401, 403, 422].includes(e?.response?.status))
+                window.location.href = "/login";
+            else filenameErr = handleAxiosError(e);
+        }
+    }
+
+    async function changeLanguage() {
+        try {
+            const { data } = await axios.put<Resp<{ code: Code }>>(
+                apiUrl + "/api/code/" + code.id,
+                {
+                    filename,
+                    language,
+                    code: content,
+                },
+                { headers: { Authorization: "Bearer " + accessToken } }
+            );
+            console.log(data);
+            if (data.success) window.location.reload();
+        } catch (e) {
+            if ([401, 403, 422].includes(e?.response?.status))
+                window.location.href = "/login";
+            else langErr = handleAxiosError(e);
+        }
+    }
+
+    async function save() {
+        try {
+            const { data } = await axios.put<Resp<{ code: Code }>>(
+                apiUrl + "/api/code/" + code.id,
+                {
+                    filename,
+                    language,
+                    code: content,
+                },
+                { headers: { Authorization: "Bearer " + accessToken } }
+            );
+            if (data.success) window.location.reload();
+        } catch (e) {
+            if ([401, 403, 422].includes(e?.response?.status))
+                window.location.href = "/login";
+            else alert(handleAxiosError(e));
+        }
+    }
 </script>
 
 <style>
@@ -67,16 +131,107 @@
 <div class="card">
     <div class="card-header d-flex align-items-center">
         <div class="d-flex align-items-center">
-            <button class="btn edit-button-parent">{code.filename}
+            <button
+                class="btn edit-button-parent"
+                data-bs-toggle="modal"
+                data-bs-target="#filename-modal">{code.filename}
                 <i class="fas fa-pen edit-button" />
             </button>
             <button
+                data-bs-toggle="modal"
+                data-bs-target="#lang-modal"
                 class="btn btn-sm text-muted edit-button-parent">{code.language.toUpperCase()}
                 <i class="fas fa-pen edit-button" />
             </button>
         </div>
+        <div class="d-flex align-items-center ms-auto">
+            <button class="btn btn-success" on:click={save}>Save</button>
+        </div>
     </div>
     <div class="card-body">
-        <Codemirror defaultValue={content} language={code.language} />
+        <Codemirror
+            defaultValue={content}
+            language={code.language}
+            lineNumbers={false}
+            on:change={(value) => (content = value.detail)} />
+    </div>
+</div>
+
+<!-- Modals -->
+<div
+    class="modal fade"
+    id="filename-modal"
+    tabindex="-1"
+    aria-labelledby="filename-title">
+    <div class="modal-dialog">
+        <form on:submit|preventDefault={changeFilename} class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filename-title">Change filename</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close" />
+            </div>
+            <div class="modal-body">
+                {#if filenameErr}
+                    <div class="alert alert-danger">{filenameErr}</div>
+                {/if}
+                <p>
+                    <label for="filename">New filename</label>
+                    <input
+                        type="text"
+                        id="filename"
+                        class="form-control"
+                        bind:value={filename} />
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    data-bs-dismiss="modal">Cancel</button>
+                <button type="sumbit" class="btn btn-success">Change</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div
+    class="modal fade"
+    id="lang-modal"
+    tabindex="-1"
+    aria-labelledby="lang-title">
+    <div class="modal-dialog">
+        <form on:submit|preventDefault={changeLanguage} class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lang-title">Change language</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close" />
+            </div>
+            <div class="modal-body">
+                {#if langErr}
+                    <div class="alert alert-danger">{langErr}</div>
+                {/if}
+                <p>
+                    <label for="language">Language</label>
+                    <input
+                        type="text"
+                        id="language"
+                        class="form-control"
+                        bind:value={language} />
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success">Change</button>
+            </div>
+        </form>
     </div>
 </div>

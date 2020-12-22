@@ -20,7 +20,6 @@
     async function createCodeMirror(lang: string, value: string) {
         if (!_CodeMirror) return;
         if (editor) editor.toTextArea();
-        console.log(_CodeMirror);
 
         const codeMirrorOptions = {
             lineNumbers,
@@ -30,6 +29,7 @@
             indentWithTabs: tabLang.includes(lang),
             autoCloseBrackets: true,
             autoCloseTags: true,
+            theme: "eclipse",
             mode: modes[lang] || { name: lang },
         };
 
