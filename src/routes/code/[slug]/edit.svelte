@@ -41,7 +41,7 @@
 </script>
 
 <script lang="ts">
-    import Codemirror from "../../../components/codemirror.svelte";
+    import Codemirror from "../../../components/Codemirror.svelte";
 
     export let code: Code;
     export let content: string;
