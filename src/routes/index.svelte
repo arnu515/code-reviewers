@@ -12,12 +12,14 @@
     {#if !$user}
         <p>
             <a href="/register" class="btn btn-light">Get Started</a>
-            <a href="/posts" class="btn btn-outline-light">View posts</a>
+            <a href="/posts" class="btn btn-outline-light mt-1 mt-md-0">View
+                posts</a>
         </p>
     {:else}
         <p>
             <a href="/new" class="btn btn-light">Create new post</a>
-            <a href="/posts" class="btn btn-outline-light">Review others' code</a>
+            <a href="/posts" class="btn btn-outline-light mt-1 mt-md-0">Review
+                others' code</a>
         </p>
     {/if}
 </div>
