@@ -18,6 +18,7 @@
     import Loading from "../../../components/Loading.svelte";
     import hljs from "highlight.js";
     import { onMount } from "svelte";
+    import { user } from "../../../util/stores";
 
     export let code: Code;
     export let content: string;
@@ -43,7 +44,14 @@
 <div class="card">
     <div class="card-header d-flex" style="align-items: center">
         <span>{code.filename} by {code.user.username}</span>
-        <a class="btn ms-auto" href="/code/{code.id}/raw">view raw</a>
+        <div class="ms-auto">
+            {#if $user?.id === code.user.id}
+                <a
+                    href="/code/{code.id}/edit"
+                    class="no-underline me-2">edit</a>
+            {/if}
+            <a class="no-underline" href="/code/{code.id}/raw">view raw</a>
+        </div>
     </div>
     <div class="card-body">
         <div id="code">
