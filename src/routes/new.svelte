@@ -10,7 +10,7 @@
     const { apiUrl, accessToken } = $session;
 
     onMount(() => {
-        if (!user) goto("/login");
+        if (!$user) goto("/login");
     });
 
     let title: string,
