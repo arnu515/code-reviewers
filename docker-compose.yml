@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+    frontend:
+        build: .
+        ports:
+            - 3000:3000
+        depends_on:
+            - redis
+        links:
+            - "redis:redis"
+        environment:
+            - "REDIS_URL=redis://:@redis:6379/0"
+    redis:
+        image: redis
+        ports:
+            - 6379:6379
