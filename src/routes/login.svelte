@@ -14,6 +14,7 @@
     let error: string | null = null;
 
     let email: string, password: string;
+    let loginLoading = false;
 
     onMount(() => {
         if ($user) goto("/");
@@ -27,6 +28,7 @@
 
         if (emailError || passwordError) return;
         error = null;
+        loginLoading = true;
 
         axios
             .post<Resp<{ token: string; user: User }>>("/api/login", {
@@ -34,6 +36,7 @@
                 password,
             })
             .then((r) => {
+                loginLoading = false;
                 if (r.status === 200) {
                     $session.accessToken = r.data.data.token;
                     user.set(r.data.data.user);
@@ -43,6 +46,7 @@
                 }
             })
             .catch((e) => {
+                loginLoading = false;
                 error = handleAxiosError(e);
             });
     }
@@ -97,7 +101,12 @@
         {/if}
     </p>
     <p class="text-center">
-        <button class="btn btn-success btn-lg w-100">Login</button>
+        <button
+            class="btn btn-success btn-lg w-100"
+            disabled={loginLoading}>Login
+            {#if loginLoading}
+                <span class="spinner-border spinner-border-sm" />
+            {/if}</button>
         <small class="text-muted">or <a href="/register">register</a></small>
     </p>
 </form>

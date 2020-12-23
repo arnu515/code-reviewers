@@ -46,6 +46,9 @@
         codeErr: string = "",
         modalActive = false;
 
+    let sugLoading = false,
+        reviewLoading = false;
+
     async function getReviews() {
         try {
             const { data } = await axios.get<Resp<{ reviews: Review[] }>>(
@@ -106,6 +109,7 @@
         else reviewError = "";
 
         if (reviewError) return;
+        reviewLoading = true;
 
         try {
             const { data } = await axios.post<Resp<{ review: Review }>>(
@@ -117,8 +121,10 @@
                 },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
+            reviewLoading = false;
             if (data.success) window.location.reload();
         } catch (e) {
+            reviewLoading = false;
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/logout";
             else reviewError = handleAxiosError(e);
@@ -144,7 +150,6 @@
     }
 
     async function addSuggestion() {
-        console.error(!sugContent);
         if (!sugTitle.trim() || !sugContent.trim()) {
             sugErr = "Fill out all fields!";
             return;
@@ -156,6 +161,7 @@
         }
 
         sugErr = "";
+        sugLoading = true;
 
         try {
             const { data } = await axios.post<Resp<{ suggestion: {} }>>(
@@ -167,8 +173,10 @@
                 },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
+            sugLoading = false;
             if (data.success) window.location.reload();
         } catch (e) {
+            sugLoading = false;
             if ([403, 401, 422].includes(e?.response?.status))
                 window.location.href = "/logout";
             else sugErr = handleAxiosError(e);
@@ -381,8 +389,14 @@
                                 rows="4" />
                         </p>
                         <p>
-                            <button class="btn btn-success" type="submit">Create
-                                review</button>
+                            <button
+                                class="btn btn-success"
+                                type="submit"
+                                disabled={reviewLoading}>Create review
+                                {#if reviewLoading}
+                                    <span
+                                        class="spinner-border spinner-border-sm" />
+                                {/if}</button>
                         </p>
                     </form>
                 </div>
@@ -468,8 +482,15 @@
                             </button>
                         </p>
                         <p>
-                            <button class="btn btn-success" type="submit">Add
-                                suggestion</button>
+                            <button
+                                class="btn btn-success"
+                                type="submit"
+                                disabled={sugLoading}>Add suggestion
+                                {#if sugLoading}
+                                    <span
+                                        class="spinner-border spinner-border-sm" />
+                                {/if}
+                            </button>
                         </p>
                     </form>
                 </div>

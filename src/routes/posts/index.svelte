@@ -14,6 +14,7 @@
     let posts: Post[] | null = null;
     let page = 0;
     let isMore = true;
+    let loadingMore = false;
 
     async function getPosts(page: number): Promise<[Post[], boolean]> {
         try {
@@ -34,7 +35,9 @@
     }
 
     async function loadMorePosts() {
+        loadingMore = true;
         [posts, isMore] = await getPosts(++page);
+        loadingMore = false;
     }
 
     onMount(loadMorePosts);
@@ -54,8 +57,13 @@
     <Posts {posts} />
     <p class="text-center mt-2">
         {#if isMore}
-            <button class="btn btn-outline-dark" on:click={loadMorePosts}>Load
-                more</button>
+            <button
+                class="btn btn-outline-dark"
+                on:click={loadMorePosts}
+                disabled={loadingMore}>Load more
+                {#if loadingMore}
+                    <span class="spinner-border spinner-border-sm" />
+                {/if}</button>
         {:else}No more posts{/if}
     </p>
 {/if}

@@ -16,7 +16,8 @@
     let title: string,
         desc: string,
         sug: boolean = true,
-        error: string;
+        error: string,
+        loading = false;
 
     function submit() {
         if (!title) {
@@ -25,6 +26,7 @@
         }
 
         error = "";
+        loading = true;
 
         axios
             .post<Resp<{ post: Post }>>(
@@ -39,9 +41,11 @@
                 }
             )
             .then(({ data }) => {
+                loading = false;
                 if (data.success) goto("/posts/" + data.data.post.id + "/edit");
             })
             .catch((e) => {
+                loading = false;
                 if ([401, 422, 403].includes(e?.response?.status)) {
                     error = "Session expired";
                     goto("/logout");
@@ -95,7 +99,10 @@
         <div class="alert alert-danger">{error}</div>
     {/if}
     <div class="mt-3">
-        <button type="submit" class="btn btn-success">Create post</button>
+        <button type="submit" class="btn btn-success" disabled={loading}>Create
+            post
+            {#if loading}<span class="spinner-border spinner-border-sm" />{/if}
+        </button>
         <small class="text-muted">You can add your code later</small>
     </div>
 </form>

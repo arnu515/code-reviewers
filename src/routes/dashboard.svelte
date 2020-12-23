@@ -30,6 +30,10 @@
     let password = "",
         deleteErr = "";
 
+    let profileLoading = false,
+        passwordLoading = false,
+        deleteLoading = false;
+
     async function updateProfile() {
         if (!email || !username) {
             profileErr = "Fill out all fields!";
@@ -37,6 +41,7 @@
         }
 
         profileErr = "";
+        profileLoading = true;
 
         try {
             const { data } = await axios.put<Resp<{ user: User }>>(
@@ -47,8 +52,10 @@
                 },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
+            profileLoading = false;
             if (data.success) window.location.reload();
         } catch (e) {
+            profileLoading = false;
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/logout";
             else profileErr = handleAxiosError(e);
@@ -56,6 +63,7 @@
     }
 
     async function changePassword() {
+        passwordLoading = true;
         if (!oldPassword || !newPassword || !confirmPassword) {
             passwordErr = "Fill out all fields!";
             return;
@@ -67,6 +75,7 @@
         }
 
         passwordErr = "";
+        passwordLoading = true;
 
         try {
             const { data } = await axios.patch<Resp<{ user: User }>>(
@@ -78,8 +87,10 @@
                 },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
+            passwordLoading = false;
             if (data.success) window.location.href = "/logout";
         } catch (e) {
+            passwordLoading = false;
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/logout";
             else profileErr = handleAxiosError(e);
@@ -87,6 +98,7 @@
     }
 
     async function deleteAccount() {
+        deleteLoading = true;
         if (!password) {
             deleteErr = "Enter your password to delete your account";
             return;
@@ -98,8 +110,10 @@
                 { password },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
+            deleteLoading = false;
             if (data.success) window.location.href = "/logout";
         } catch (e) {
+            deleteLoading = false;
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/logout";
             else deleteErr = handleAxiosError(e);
@@ -156,7 +170,14 @@
             bind:value={email} />
     </p>
     <p>
-        <button class="btn btn-success" type="submit">Submit</button>
+        <button
+            class="btn btn-success"
+            type="submit"
+            disabled={profileLoading}>Submit
+            {#if profileLoading}
+                <span class="spinner-border spinner-border-sm" />
+            {/if}
+        </button>
         <button
             type="reset"
             class="btn btn-outline-secondary"
@@ -196,7 +217,15 @@
             id="confirm-password"
             class="form-control" />
     </p>
-    <p><button class="btn btn-success" type="submit">Change</button></p>
+    <p>
+        <button
+            class="btn btn-success"
+            type="submit"
+            disabled={passwordLoading}>Change
+            {#if passwordLoading}
+                <span class="spinner-border spinner-border-sm" />
+            {/if}</button>
+    </p>
 </form>
 
 <h4 class="text-danger">Danger zone</h4>
@@ -241,7 +270,12 @@
                     <p>
                         <button
                             class="btn btn-danger mt-2 w-100"
-                            type="submit">Delete account</button>
+                            type="submit"
+                            disabled={deleteLoading}>Delete account
+                            {#if deleteLoading}
+                                <span
+                                    class="spinner-border spinner-border-sm" />
+                            {/if}</button>
                     </p>
                 </form>
             </div>

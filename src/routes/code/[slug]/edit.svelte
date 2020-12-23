@@ -51,8 +51,12 @@
     let { filename, language } = code;
     let filenameErr = "",
         langErr = "";
+    let filenameLoading = false,
+        langLoading = false,
+        saveLoading = false;
 
     async function changeFilename() {
+        filenameLoading = true;
         try {
             const { data } = await axios.put<Resp<{ code: Code }>>(
                 apiUrl + "/api/code/" + code.id,
@@ -63,8 +67,10 @@
                 },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
+            filenameLoading = false;
             if (data.success) window.location.reload();
         } catch (e) {
+            filenameLoading = false;
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/login";
             else filenameErr = handleAxiosError(e);
@@ -72,6 +78,7 @@
     }
 
     async function changeLanguage() {
+        langLoading = true;
         try {
             const { data } = await axios.put<Resp<{ code: Code }>>(
                 apiUrl + "/api/code/" + code.id,
@@ -82,9 +89,10 @@
                 },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
-            console.log(data);
+            langLoading = false;
             if (data.success) window.location.reload();
         } catch (e) {
+            langLoading = false;
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/login";
             else langErr = handleAxiosError(e);
@@ -92,6 +100,7 @@
     }
 
     async function save() {
+        saveLoading = true;
         try {
             const { data } = await axios.put<Resp<{ code: Code }>>(
                 apiUrl + "/api/code/" + code.id,
@@ -102,8 +111,10 @@
                 },
                 { headers: { Authorization: "Bearer " + accessToken } }
             );
+            saveLoading = false;
             if (data.success) window.location.reload();
         } catch (e) {
+            saveLoading = false;
             if ([401, 403, 422].includes(e?.response?.status))
                 window.location.href = "/login";
             else alert(handleAxiosError(e));
@@ -145,7 +156,13 @@
             </button>
         </div>
         <div class="d-flex align-items-center ms-auto">
-            <button class="btn btn-success" on:click={save}>Save</button>
+            <button
+                class="btn btn-success"
+                on:click={save}
+                disabled={saveLoading}>Save
+                {#if saveLoading}
+                    <span class="spinner-border spinner-border-sm" />
+                {/if}</button>
         </div>
     </div>
     <div class="card-body">
@@ -191,7 +208,13 @@
                     class="btn btn-outline-secondary"
                     type="button"
                     data-bs-dismiss="modal">Cancel</button>
-                <button type="sumbit" class="btn btn-success">Change</button>
+                <button
+                    type="sumbit"
+                    class="btn btn-success"
+                    disabled={filenameLoading}>Change
+                    {#if filenameLoading}
+                        <span class="spinner-border spinner-border-sm" />
+                    {/if}</button>
             </div>
         </form>
     </div>
@@ -230,7 +253,13 @@
                     class="btn btn-outline-secondary"
                     type="button"
                     data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-success">Change</button>
+                <button
+                    type="submit"
+                    class="btn btn-success"
+                    disabled={langLoading}>Change
+                    {#if langLoading}
+                        <span class="spinner-border spinner-border-sm" />
+                    {/if}</button>
             </div>
         </form>
     </div>

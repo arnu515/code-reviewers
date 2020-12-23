@@ -15,6 +15,7 @@
     let error: string | null = null;
 
     let email: string, password: string, username: string;
+    let registerLoading = false;
 
     onMount(() => {
         if ($user) goto("/");
@@ -34,6 +35,7 @@
 
         if (emailError || passwordError || usernameError) return;
         error = null;
+        registerLoading = true;
 
         axios
             .post<Resp<{ token: string; user: User }>>("/api/register", {
@@ -42,6 +44,7 @@
                 username,
             })
             .then((r) => {
+                registerLoading = false;
                 if (r.status === 200) {
                     $session.accessToken = r.data.data.token;
                     user.set(r.data.data.user);
@@ -51,6 +54,7 @@
                 }
             })
             .catch((e) => {
+                registerLoading = false;
                 error = handleAxiosError(e);
             });
     }
@@ -119,7 +123,12 @@
         {/if}
     </p>
     <p class="text-center">
-        <button class="btn btn-success btn-lg w-100">Register</button>
+        <button
+            class="btn btn-success btn-lg w-100"
+            disabled={registerLoading}>Register
+            {#if registerLoading}
+                <span class="spinner-border spinner-border-sm" />
+            {/if}</button>
         <small class="text-muted">or <a href="/login">login</a></small>
     </p>
 </form>
