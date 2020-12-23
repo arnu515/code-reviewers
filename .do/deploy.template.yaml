@@ -19,4 +19,4 @@ spec:
     databases:
         - name: redis
           engine: REDIS
-          version: 6
+          version: "6"
