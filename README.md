@@ -69,4 +69,4 @@ $ npm run build
 $ npm start
 ```
 
-4. Visit your app at [localhost:3000]=(http://localhost:3000)
+4. Visit your app at [localhost:3000](http://localhost:3000)
