@@ -1,0 +1,15 @@
+spec:
+    name: "code-reviewers"
+    services:
+        - name: web
+          git:
+              branch: main
+              repo_clone_url: https://github.com/arnu515/code-reviewers.git
+          envs:
+              - key: SECRET
+                scope: RUN_TIME
+                type: SECRET
+              - key: REDIS_URL
+                scope: RUN_TIME
+              - key: API_URL
+                scope: RUN_TIME
