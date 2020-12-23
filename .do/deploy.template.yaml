@@ -7,9 +7,16 @@ spec:
               repo_clone_url: https://github.com/arnu515/code-reviewers.git
           envs:
               - key: SECRET
-                scope: RUN_TIME
+                scope: RUN_AND_BUILD_TIME
                 type: SECRET
               - key: REDIS_URL
-                scope: RUN_TIME
+                scope: RUN_AND_BUILD_TIME
               - key: API_URL
-                scope: RUN_TIME
+                scope: RUN_AND_BUILD_TIME
+          dockerfile_path: ./Dockerfile
+          http_port: 3000
+
+    databases:
+        - name: redis
+          engine: REDIS
+          version: 6
