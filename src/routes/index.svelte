@@ -57,11 +57,9 @@
         </div>
         <div class="col card">
             <div class="card-body">
-                <h3 class="card-title">Pair programming</h3>
+                <h3 class="card-title">Suggest changes</h3>
                 <p class="card-text">
-                    Code with your friends, colleagues, workers, bosses, and
-                    even random strangers on the internet. Once someone's left a
-                    review on your code, you can then sit and program with them!
+                    Allow users to suggest changes to your code while rating it.
                 </p>
             </div>
         </div>
